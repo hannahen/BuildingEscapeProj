@@ -44,11 +44,23 @@ void UGrabber::SetupInputComponent(){
 
 void UGrabber::Grab(){
     UE_LOG(LogTemp, Warning, TEXT("Grab key pressed"));
-    GetFirstPhysicsBodyInReach();
+    auto HitResult = GetFirstPhysicsBodyInReach();
+    auto ComponentToGrab = HitResult.GetComponent();
+    auto ActorHit = HitResult.GetActor();
+    
+    if(ActorHit){
+        PhysicsHandle->GrabComponent(
+                    ComponentToGrab,
+                    NAME_None,
+                    ComponentToGrab->GetOwner()->GetActorLocation(),
+                    true // allow rotation
+                    );
+    }
 }
 
 void UGrabber::Release(){
     UE_LOG(LogTemp, Warning, TEXT("Grab key released"));
+    PhysicsHandle->ReleaseComponent();
 }
 
 const FHitResult UGrabber::GetFirstPhysicsBodyInReach(){
@@ -74,12 +86,30 @@ const FHitResult UGrabber::GetFirstPhysicsBodyInReach(){
     if (HitObject){
         UE_LOG(LogTemp, Warning, TEXT("We hit a ... %s"), *(HitObject->GetName()));
     }
-    return FHitResult();
+    return Hit;
 }
 
 // Called every frame
 void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+    
+    //TODO: refactor this
+    FVector PlayerViewPointLocation;
+    FRotator PlayerViewPointRotation;
+    GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+                                                               OUT PlayerViewPointLocation,
+                                                               OUT PlayerViewPointRotation
+                                                               );
+    
+    FString OutputLocation = PlayerViewPointLocation.ToString();
+    FString OutputRotation =  PlayerViewPointRotation.ToString();
+    
+    //get line trace end
+    FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
+    
+    if(PhysicsHandle->GrabbedComponent){
+        PhysicsHandle->SetTargetLocation(LineTraceEnd);
+    }
 }
 
