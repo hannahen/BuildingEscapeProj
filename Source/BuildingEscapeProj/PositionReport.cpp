@@ -11,8 +11,7 @@ UPositionReport::UPositionReport()
 	// off to improve performance if you don't need them.
 	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+    
 }
 
 
@@ -22,6 +21,10 @@ void UPositionReport::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+    FString ObjectName = GetOwner()->GetName();
+    FString ObjectLocation = GetOwner()->GetTransform().GetLocation().ToString();
+    // ...
+    UE_LOG(LogTemp, Warning, TEXT("Position Report for %s at %s"), *ObjectName, *ObjectLocation);
 	
 }
 
