@@ -22,22 +22,15 @@ void UOpenDoor::BeginPlay() {
 void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
-    if(GetTotalMassOfActorsOnPlate() > 50.f){ //TODO make into a parameter
-        OpenDoor();
-        LastDoorOpenTime = GetWorld()->GetTimeSeconds();
-    }
-    
-    if(GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorCloseDelay){
-        CloseDoor();
+    if(GetTotalMassOfActorsOnPlate() > TriggerMass){ //TODO make into a parameter
+        OnOpenRequest.Broadcast();
+    }else {
+        OnCloseRequest.Broadcast();
     }
 
 }
 
 ///helper methods
-void UOpenDoor::OpenDoor(){
-    //Owner->SetActorRotation(FRotator(0.0F, OpenAngle, 0.0F));
-    OnOpenRequest.Broadcast();
-}
 void UOpenDoor::CloseDoor(){
     Owner->SetActorRotation(FRotator(0.0F, 90.0F, 0.0F));
 }
